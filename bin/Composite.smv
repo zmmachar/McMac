@@ -1,0 +1,90 @@
+MODULE main
+
+	VAR
+		a: boolean;
+		example:example(a);
+		example1:example1(a);
+		match: boolean;
+
+	ASSIGN
+		init(match) := TRUE;
+		next(match) :=
+			case
+				example.b=example1.output: TRUE;
+				TRUE: FALSE;
+			esac;
+
+	LTLSPEC
+
+		G(match)
+
+MODULE example(a)
+
+
+	VAR 
+
+		state : {s2s4,s1s3};
+
+
+	ASSIGN 
+
+		init(state) := s1s3;
+
+		next(state) :=
+
+			case
+
+				state=s1s3 & a=TRUE :{ s1s3 };
+
+				state=s1s3 & a=FALSE :{ s2s4 };
+
+				state=s2s4 & a=TRUE :{ s1s3 };
+
+				state=s2s4 & a=FALSE :{ s2s4 };
+
+				state=s1s3 & a=TRUE :{ s1s3 };
+
+				state=s1s3 & a=FALSE :{ s2s4 };
+
+				TRUE             : state;
+
+			esac;
+	
+	DEFINE
+		b:= ( state=s1s3 & a=TRUE )    | ( state=s2s4 & a=FALSE  );
+
+MODULE example1(input)
+
+
+	VAR 
+
+		state : {state1,state2};
+
+
+	ASSIGN 
+
+		init(state) := state2;
+
+		next(state) :=
+
+			case
+
+				state=state2 & input=TRUE :{ state2 };
+
+				state=state2 & input=FALSE :{ state1 };
+
+				state=state1 & input=TRUE :{ state2 };
+
+				state=state1 & input=FALSE :{ state1 };
+
+				state=state2 & input=TRUE :{ state2 };
+
+				state=state2 & input=FALSE :{ state1 };
+
+				TRUE             : state;
+
+			esac;
+	
+	DEFINE
+		output:= ( state=state2 & input=TRUE )    | ( state=state1 & input=FALSE  );
+
