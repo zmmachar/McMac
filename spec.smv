@@ -1,0 +1,35 @@
+
+MODULE example(a) 
+
+	VAR 
+
+		state : {s2s4,s1s3};
+
+
+	ASSIGN 
+
+		init(state) := s1s3;
+
+		next(state) :=
+
+			case
+
+				state=s1s3 & a=TRUE :{ s1s3 };
+
+				state=s1s3 & a=FALSE :{ s2s4 };
+
+				state=s2s4 & a=TRUE :{ s1s3 };
+
+				state=s2s4 & a=FALSE :{ s2s4 };
+
+				state=s1s3 & a=TRUE :{ s1s3 };
+
+				state=s1s3 & a=FALSE :{ s2s4 };
+
+				TRUE             : state;
+
+			esac;
+	
+	DEFINE
+		b:= ( state=s1s3 & a=TRUE )    | ( state=s2s4 & a=FALSE  );
+
