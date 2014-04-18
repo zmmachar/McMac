@@ -129,7 +129,7 @@ public class Grader {
                 + "\tLTLSPEC\n\n"
                 + "\t\tG(match)\n\n";
         
-        compositeSMV += module1.getModule();
+        compositeSMV += module1.getModule() + "\n";
         compositeSMV += module2.getModule();
         System.out.println(compositeSMV);
         return compositeSMV;
@@ -143,13 +143,13 @@ public class Grader {
     private List<ModuleInfo> getModuleInfo(String smvSpec) {
         String currentSpec = smvSpec;
         List<ModuleInfo> modules = new ArrayList<ModuleInfo>();
-        while(currentSpec.length() > 0) {
+        while(currentSpec.contains("MODULE")) {
             int moduleIndex = currentSpec.indexOf("MODULE");
             if(moduleIndex != -1) {
                 //Get the entire module out
-                int moduleEnding = currentSpec.substring(moduleIndex).indexOf("Module");
+                int moduleEnding = currentSpec.substring(moduleIndex+6).indexOf("MODULE");
                 //If you are on the last module in the file, just grab all till the end
-                moduleEnding = (moduleEnding == -1)? currentSpec.length() : moduleEnding;
+                moduleEnding = (moduleEnding == -1)? currentSpec.length() : moduleEnding+6;
                 
                 String currentModule = currentSpec.substring(moduleIndex, moduleEnding);
                 

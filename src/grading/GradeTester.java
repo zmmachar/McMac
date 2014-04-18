@@ -18,10 +18,12 @@ import ptolemy.verification.kernel.MathematicalModelConverter.FormulaType;
 
 public class GradeTester {
     public static void main(String[] args) throws Exception {
-        /**MoMLParser parser = new MoMLParser();
-        FmvAutomaton automaton =(FmvAutomaton)parser.parseFile("example.xml");
-        System.out.println(automaton.convertToSMVFormat("F(TRUE)", FormulaType.LTL, 0));
-        **/
+        MoMLParser parser = new MoMLParser();
+        CompositeActor actor =(CompositeActor)parser.parseFile("updatedExample.xml");
+        String spec = SMVUtility.generateSMVDescription(actor, "F(TRUE)", "LTL", "0").toString();
+        Grader grader = new Grader();
+        grader.compareSMVSpecs(spec, spec);
+        /**
         System.out.println(new File(".").getAbsolutePath());
         String spec1, spec2;
         if(args.length == 2) {
@@ -35,7 +37,7 @@ public class GradeTester {
         Grader grader = new Grader();
         grader.compareSMVSpecs(spec1, spec2);
         
-        
+        **/
         
         /**Iterator actors = automaton.entityList().iterator();
         while(actors.hasNext()) {
