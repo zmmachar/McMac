@@ -1,0 +1,55 @@
+
+MODULE FmvAutomaton( a_value,a_isPresent )
+	VAR 
+		state : {s2,s1};
+	ASSIGN 
+		init(state) := s1;
+		next(state) :=
+			case
+				state=s1 :{ s2 };
+				state=s1 :{ s1 };
+				state=s2 :{ s1 };
+				state=s2 :{ s2 };
+				state=s1 :{ s2 };
+				state=s1 :{ s1 };
+				1             : state;
+			esac;
+
+
+	DEFINE
+		b_value :=  (  !(state=s1 & b_isPresent )  )   | ( state=s1 & b_isPresent  )   | ( state=s2 & b_isPresent  )   & (  !(state=s2 & b_isPresent )  )   & (  !(state=s1 & b_isPresent )  )   | ( state=s1 & b_isPresent  ) ;
+
+ 		b_isPresent :=  ( state=s1 )   | ( state=s1 )   | ( state=s2 )   | ( state=s2 )   | ( state=s1 )   | ( state=s1 ) ;
+
+ 
+MODULE FmvAutomaton2( b_value,b_isPresent )
+	VAR 
+		state : {state2,state};
+	ASSIGN 
+		init(state) := state;
+		next(state) :=
+			case
+				state=state & b_value=1 & b_isPresent  :{ state };
+				state=state & b_value=0 & b_isPresent  :{ state2 };
+				state=state2 & b_value=1 & b_isPresent  :{ state2 };
+				state=state2 & b_value=0 & b_isPresent  :{ state };
+				state=state & b_value=1 & b_isPresent  :{ state };
+				state=state & b_value=0 & b_isPresent  :{ state2 };
+				1             : state;
+			esac;
+
+
+	DEFINE
+		c_isPresent :=  ( state=state & b_value=1 & b_isPresent  )   | ( state=state & b_value=0 & b_isPresent  )   | ( state=state2 & b_value=1 & b_isPresent  )   | ( state=state2 & b_value=0 & b_isPresent  )   | ( state=state & b_value=1 & b_isPresent  )   | ( state=state & b_value=0 & b_isPresent  ) ;
+
+ 		c_value :=  (  !(state=state & b_value=1 & b_isPresent  & c_isPresent )  )   & (  !(state=state & b_value=0 & b_isPresent  & c_isPresent )  )   | ( state=state2 & b_value=1 & b_isPresent  & c_isPresent  )   | ( state=state2 & b_value=0 & b_isPresent  & c_isPresent  )   & (  !(state=state & b_value=1 & b_isPresent  & c_isPresent )  )   & (  !(state=state & b_value=0 & b_isPresent  & c_isPresent )  ) ;
+
+ 
+
+MODULE main 
+	VAR 
+		FmvAutomaton: FmvAutomaton( 1, 1);
+		FmvAutomaton2: FmvAutomaton2(FmvAutomaton.b_value, FmvAutomaton.b_isPresent );
+
+	SPEC 
+		

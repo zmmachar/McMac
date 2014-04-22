@@ -19,10 +19,11 @@ import ptolemy.verification.kernel.MathematicalModelConverter.FormulaType;
 public class GradeTester {
     public static void main(String[] args) throws Exception {
         MoMLParser parser = new MoMLParser();
-        CompositeActor actor =(CompositeActor)parser.parseFile("updatedExample.xml");
+        CompositeActor actor =(CompositeActor)parser.parseFile("refinementTest.xml");
         String spec = SMVUtility.generateSMVDescription(actor, "F(TRUE)", "LTL", "0").toString();
-        Grader grader = new Grader();
-        grader.compareSMVSpecs(spec, spec);
+        System.out.println(spec);
+        //Grader grader = new Grader();
+        //grader.compareSMVSpecs(spec, spec);
         /**
         System.out.println(new File(".").getAbsolutePath());
         String spec1, spec2;

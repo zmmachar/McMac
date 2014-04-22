@@ -1,3 +1,10 @@
+//TODO:  Finish creating a useful composition for each spec.  This means using the info in the main module output
+//by ptolemy to grab information about which modules are feeding into which others.  First, computer which
+//Inputs need to be given by checking which modules have constant arguments.  Use those to compose an argument
+//list for the main module.  Then, compute which outputs are actually not being consumed by comparing the 
+//list of arguments in main to the list of outputs in each module. Finally, use that list of non-consumed 
+//outputs to write a DEFINE section for the main module. Ultimately, create one huge MODULE definition 
+//named main with a body, inputs, and outputs properly calculated.
 package grading;
 
 import java.io.BufferedReader;
@@ -25,9 +32,11 @@ public class Grader {
      * @return True if the SMVs give equivalent output for equivalent input
      */
     public boolean compareSMVSpecs(String spec1, String spec2) {
-        //System.out.println(spec1);
         List<ModuleInfo> spec1Modules = getModuleInfo(spec1);
         List<ModuleInfo> spec2Modules = getModuleInfo(spec2);
+        
+        //Take a list of modules and turn them into one big composite module
+        ModuleInfo megaModule1 = makeMegaModule(spec1Modules);
         
         String compositeSMV = getCompositeSMV(spec1Modules, spec2Modules);
         
@@ -39,6 +48,18 @@ public class Grader {
         }
         
         return true;
+    }
+    private ModuleInfo makeMegaModule(List<ModuleInfo> modules) {
+        assert(modules.size()>=1);
+        //If there is only one module, hooray, just spit that back out
+        if(modules.size() == 1) {
+            return modules.get(0);
+        } else {
+            String megaModuleName = "Composite";
+            String megaModule = "";
+            
+            return null;
+        }
     }
     
     private void invokeNuSMV(String spec) throws IOException {
@@ -160,17 +181,17 @@ public class Grader {
                 
                 currentSpec = currentSpec.substring(moduleEnding);
                 
-                if (moduleDeclaration.equals("main")) {
-                    System.out.println("Ignoring main module");
-                    //Look for the non main modules
+            
+                //Get name of module, and then its arguments
+                
+                int argIndex = moduleDeclaration.indexOf('(');
+                List<String> args = new ArrayList<String>();
+                String moduleName;
+                if(argIndex < 0) {
+                    moduleName = moduleDeclaration.trim();
                 } else {
-                    //Get name of module, and then its arguments
+                    moduleName = moduleDeclaration.substring(0, argIndex);
                     
-                    int argIndex = moduleDeclaration.indexOf('(');
-                    
-                    String moduleName = moduleDeclaration.substring(0, argIndex);
-                    
-                    List<String> args = new ArrayList<String>();
                     
                     //Parse list of arguments to method;
                     String currentArg = "";
@@ -187,15 +208,20 @@ public class Grader {
                     }
                     //Add the final argument
                     args.add(currentArg);
-                    
-                    
-                    //NOW get output signals
-                    //Which is everything after DEFINE
+                }
+                
+                
+                //NOW get output signals
+                //Which is everything after DEFINE
+                int definitionIndex = currentModule.indexOf("DEFINE");
+                List<String> outputs = new ArrayList<String>();
+                if(definitionIndex < 0 ) {
+                     //Do nothing
+                } else {
                     String outputBlock= currentModule.substring(currentModule.indexOf("DEFINE"));
                     //Using a scanner to deal with whitespace
                     Scanner outputScanner = new Scanner(outputBlock);
-                    List<String> outputs = new ArrayList<String>();
-                    String line, outputName, outputType;
+                    String line, outputName;
                     int assignIndex;
                     while(outputScanner.hasNext()) {
                         line = outputScanner.nextLine();
@@ -206,13 +232,15 @@ public class Grader {
                             outputs.add(outputName);
                         }
                     }
-                    String body = currentModule.substring(newLineIndex);
-                    modules.add(new ModuleInfo(moduleName, args, outputs, body));
-                    
+                    outputScanner.close();
                 }
+                String body = currentModule.substring(newLineIndex);
+                modules.add(new ModuleInfo(moduleName, args, outputs, body));
+                
             }
-                    
         }
+                    
+        
         return modules;
     }
 }
