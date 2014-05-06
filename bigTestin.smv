@@ -1,0 +1,187 @@
+MODULE main
+
+	VAR
+		a_value: boolean;
+		a_isPresent: boolean;
+		compositeModule:compositeModule(a_value,a_isPresent);
+		compositeModule2:compositeModule2(a_value,a_isPresent);
+		match: boolean;
+
+	ASSIGN
+		init(match) := TRUE;
+		next(match) :=
+			case
+				compositeModule.b_value=compositeModule2.b_value&compositeModule.b_isPresent=compositeModule2.b_isPresent: TRUE;
+				TRUE: FALSE;
+			esac;
+
+	LTLSPEC
+
+		G(match)
+
+MODULE compositeModule(a_value,a_isPresent)
+
+	VAR
+		ModalModel : ModalModel(a_value,a_isPresent);
+
+
+	DEFINE
+		b_value := ModalModel.b_value;
+		b_isPresent := ModalModel.b_isPresent;
+
+MODULE ModalModelInner(a_value,a_isPresent,UpperState,UpperPrev)
+
+	VAR 
+		state : {s5,s3,s4};
+		a : { ls,0,1,gt };
+	ASSIGN 
+		init(state) := s3;
+		next(state) :=
+			case
+				(UpperState = s2) & state=s3 & a_value=TRUE & a_isPresent  :{ s4 };
+				(UpperState = s2) & state=s3 & a_value=FALSE & a_isPresent  :{ s3 };
+				(UpperState = s2) & state=s3 & a_value=TRUE & a_isPresent  :{ s4 };
+				(UpperState = s2) & state=s3 & a_value=FALSE & a_isPresent  :{ s3 };
+				(UpperState = s2) & state=s4 & a_value=TRUE & a_isPresent  :{ s5 };
+				(UpperState = s2) & state=s4 & a_value=FALSE & a_isPresent  :{ s4 };
+				(UpperState = s2) & state=s5 & a_value=TRUE & a_isPresent  :{ s3 };
+				(UpperState = s2) & state=s5 & a_value=FALSE & a_isPresent  :{ s5 };
+				UpperState != s2             : { s3 };
+				TRUE             : state;
+			esac;
+
+		init(a) := 1;
+		next(a) :=
+			case
+				TRUE             : a;
+			esac;
+
+
+	DEFINE
+		b_value :=  ((UpperState = s2| UpperPrev = s2) &  !(state=s3 & b_isPresent  & a_value=TRUE & a_isPresent )  )   & ((UpperState = s2| UpperPrev = s2) &  !(state=s3 & b_isPresent  & a_value=FALSE & a_isPresent )  )  & ((UpperState = s2| UpperPrev = s2) &  !(state=s3 & b_isPresent  & a_value=TRUE & a_isPresent )  )  & ((UpperState = s2| UpperPrev = s2) &  !(state=s3 & b_isPresent  & a_value=FALSE & a_isPresent )  )  & ((UpperState = s2| UpperPrev = s2) &  !(state=s4 & b_isPresent  & a_value=TRUE & a_isPresent )  )  & ((UpperState = s2| UpperPrev = s2) &  !(state=s4 & b_isPresent  & a_value=FALSE & a_isPresent )  )  | ((UpperState = s2| UpperPrev = s2) & state=s5 & b_isPresent  & a_value=TRUE & a_isPresent  )  & ((UpperState = s2| UpperPrev = s2) &  !(state=s5 & b_isPresent  & a_value=FALSE & a_isPresent )  ) ;
+
+		b_isPresent :=  ((UpperState = s2| UpperPrev = s2) & state=s3 & a_value=TRUE & a_isPresent  )   | ((UpperState = s2| UpperPrev = s2) & state=s3 & a_value=FALSE & a_isPresent  )  | ((UpperState = s2| UpperPrev = s2) & state=s3 & a_value=TRUE & a_isPresent  )  | ((UpperState = s2| UpperPrev = s2) & state=s3 & a_value=FALSE & a_isPresent  )  | ((UpperState = s2| UpperPrev = s2) & state=s4 & a_value=TRUE & a_isPresent  )  | ((UpperState = s2| UpperPrev = s2) & state=s4 & a_value=FALSE & a_isPresent  )  | ((UpperState = s2| UpperPrev = s2) & state=s5 & a_value=TRUE & a_isPresent  )  | ((UpperState = s2| UpperPrev = s2) & state=s5 & a_value=FALSE & a_isPresent  )  ;
+
+
+MODULE ModalModel(a_value,a_isPresent)
+
+	VAR 
+		ModalModelInner: ModalModelInner( a_value, a_isPresent, state, prev );
+
+ 		state : {s1,s2};
+		prev: {s1,s2};
+		a : { ls,0,1,gt };
+	ASSIGN 
+		init(prev) := s1;
+		next(prev) :=
+			case
+				TRUE : {state};
+			esac;
+		init(state) := s1;
+		next(state) :=
+			case
+				state=s1 & a_value=FALSE & a_isPresent  :{ s1 };
+				state=s1 & a_value=TRUE & a_isPresent  :{ s2 };
+				state=s2 & a_value=TRUE & a_isPresent  :{ s1 };
+				state=s2 & a_value=TRUE & a_isPresent  :{ s2 };
+				state=s1 & a_value=FALSE & a_isPresent  :{ s1 };
+				state=s1 & a_value=TRUE & a_isPresent  :{ s2 };
+				TRUE             : state;
+			esac;
+
+		init(a) := 1;
+		next(a) :=
+			case
+				TRUE             : a;
+			esac;
+
+
+	DEFINE
+		b_value :=  ( state=s1 & b_isPresent  & a_value=FALSE & a_isPresent  )   & (  !(state=s1 & b_isPresent  & a_value=TRUE & a_isPresent )  )   & (  !(state=s2 & b_isPresent  & a_value=TRUE & a_isPresent )  )   | ( state=s1 & b_isPresent  & a_value=FALSE & a_isPresent  )   & (  !(state=s1 & b_isPresent  & a_value=TRUE & a_isPresent )  )  | ModalModelInner.b_value;
+
+		b_isPresent :=  ( state=s1 & a_value=FALSE & a_isPresent  )   | ( state=s1 & a_value=TRUE & a_isPresent  )   | ( state=s2 & a_value=TRUE & a_isPresent  )   | ( state=s1 & a_value=FALSE & a_isPresent  )   | ( state=s1 & a_value=TRUE & a_isPresent  )  | ModalModelInner.b_isPresent;
+
+
+
+MODULE compositeModule2(a_value,a_isPresent)
+
+	VAR
+		ModalModel2 : ModalModel2(a_value,a_isPresent);
+
+
+	DEFINE
+		b_value := ModalModel2.b_value;
+		b_isPresent := ModalModel2.b_isPresent;
+
+MODULE ModalModel2Inner2(a_value,a_isPresent,UpperState,UpperPrev)
+
+	VAR 
+		state : {s5,s3,s4};
+		a : { ls,0,1,gt };
+	ASSIGN 
+		init(state) := s3;
+		next(state) :=
+			case
+				(UpperState = s2) & state=s3 & a_value=TRUE & a_isPresent  :{ s4 };
+				(UpperState = s2) & state=s3 & a_value=FALSE & a_isPresent  :{ s3 };
+				(UpperState = s2) & state=s3 & a_value=TRUE & a_isPresent  :{ s4 };
+				(UpperState = s2) & state=s3 & a_value=FALSE & a_isPresent  :{ s3 };
+				(UpperState = s2) & state=s4 & a_value=TRUE & a_isPresent  :{ s5 };
+				(UpperState = s2) & state=s4 & a_value=FALSE & a_isPresent  :{ s4 };
+				(UpperState = s2) & state=s5 & a_value=TRUE & a_isPresent  :{ s3 };
+				(UpperState = s2) & state=s5 & a_value=FALSE & a_isPresent  :{ s5 };
+				UpperState != s2             : { s3 };
+				TRUE             : state;
+			esac;
+
+		init(a) := 1;
+		next(a) :=
+			case
+				TRUE             : a;
+			esac;
+
+
+	DEFINE
+		b_value :=  ((UpperState = s2| UpperPrev = s2) &  !(state=s3 & b_isPresent  & a_value=TRUE & a_isPresent )  )   & ((UpperState = s2| UpperPrev = s2) &  !(state=s3 & b_isPresent  & a_value=FALSE & a_isPresent )  )  & ((UpperState = s2| UpperPrev = s2) &  !(state=s3 & b_isPresent  & a_value=TRUE & a_isPresent )  )  & ((UpperState = s2| UpperPrev = s2) &  !(state=s3 & b_isPresent  & a_value=FALSE & a_isPresent )  )  & ((UpperState = s2| UpperPrev = s2) &  !(state=s4 & b_isPresent  & a_value=TRUE & a_isPresent )  )  & ((UpperState = s2| UpperPrev = s2) &  !(state=s4 & b_isPresent  & a_value=FALSE & a_isPresent )  )  | ((UpperState = s2| UpperPrev = s2) & state=s5 & b_isPresent  & a_value=TRUE & a_isPresent  )  & ((UpperState = s2| UpperPrev = s2) &  !(state=s5 & b_isPresent  & a_value=FALSE & a_isPresent )  ) ;
+
+		b_isPresent :=  ((UpperState = s2| UpperPrev = s2) & state=s3 & a_value=TRUE & a_isPresent  )   | ((UpperState = s2| UpperPrev = s2) & state=s3 & a_value=FALSE & a_isPresent  )  | ((UpperState = s2| UpperPrev = s2) & state=s3 & a_value=TRUE & a_isPresent  )  | ((UpperState = s2| UpperPrev = s2) & state=s3 & a_value=FALSE & a_isPresent  )  | ((UpperState = s2| UpperPrev = s2) & state=s4 & a_value=TRUE & a_isPresent  )  | ((UpperState = s2| UpperPrev = s2) & state=s4 & a_value=FALSE & a_isPresent  )  | ((UpperState = s2| UpperPrev = s2) & state=s5 & a_value=TRUE & a_isPresent  )  | ((UpperState = s2| UpperPrev = s2) & state=s5 & a_value=FALSE & a_isPresent  )  ;
+
+
+MODULE ModalModel2(a_value,a_isPresent)
+
+	VAR 
+		ModalModel2Inner2: ModalModel2Inner2( a_value, a_isPresent, state, prev );
+
+ 		state : {s1,s2};
+		prev: {s1,s2};
+		a : { ls,0,1,gt };
+	ASSIGN 
+		init(prev) := s1;
+		next(prev) :=
+			case
+				TRUE : {state};
+			esac;
+		init(state) := s1;
+		next(state) :=
+			case
+				state=s1 & a_value=FALSE & a_isPresent  :{ s1 };
+				state=s1 & a_value=TRUE & a_isPresent  :{ s2 };
+				state=s2 & a_value=TRUE & a_isPresent  :{ s1 };
+				state=s2 & a_value=TRUE & a_isPresent  :{ s2 };
+				state=s1 & a_value=FALSE & a_isPresent  :{ s1 };
+				state=s1 & a_value=TRUE & a_isPresent  :{ s2 };
+				TRUE             : state;
+			esac;
+
+		init(a) := 1;
+		next(a) :=
+			case
+				TRUE             : a;
+			esac;
+
+
+	DEFINE
+		b_value :=  ( state=s1 & b_isPresent  & a_value=FALSE & a_isPresent  )   & (  !(state=s1 & b_isPresent  & a_value=TRUE & a_isPresent )  )   & (  !(state=s2 & b_isPresent  & a_value=TRUE & a_isPresent )  )   | ( state=s1 & b_isPresent  & a_value=FALSE & a_isPresent  )   & (  !(state=s1 & b_isPresent  & a_value=TRUE & a_isPresent )  )  | ModalModel2Inner2.b_value;
+
+		b_isPresent :=  ( state=s1 & a_value=FALSE & a_isPresent  )   | ( state=s1 & a_value=TRUE & a_isPresent  )   | ( state=s2 & a_value=TRUE & a_isPresent  )   | ( state=s1 & a_value=FALSE & a_isPresent  )   | ( state=s1 & a_value=TRUE & a_isPresent  )  | ModalModel2Inner2.b_isPresent;
+
