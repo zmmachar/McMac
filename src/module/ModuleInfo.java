@@ -10,11 +10,11 @@ public class ModuleInfo {
     public List<String> outputs;
     public String body;
     
-    public ModuleInfo(String moduleName, List<String> parameters, List<String> retVals,
+    public ModuleInfo(String moduleName, List<String> args, List<String> outputs,
             String body) {
         this.name = moduleName;
-        this.args = parameters;
-        this.outputs = retVals;
+        this.args = args;
+        this.outputs = outputs;
         this.body = body;
     }
     
